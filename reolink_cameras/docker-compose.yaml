@@ -1,0 +1,29 @@
+services:
+  ######################################################################################################################
+  #################### Frigate
+  ######################################################################################################################
+  frigate:
+    container_name: frigate
+    restart: unless-stopped
+    # Reason: https://github.com/blakeblackshear/frigate/discussions/6450#discussioncomment-7935646
+    privileged: true
+    image: ghcr.io/blakeblackshear/frigate:33825f6
+    shm_size: "500mb"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./frigate/config:/config
+      - ./frigate/storage:/media/frigate
+      - type: tmpfs # Optional: 2GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 2000000000
+    env_file:
+      - .env
+    ports:
+      - '8971:8971'
+      - '5000:5000' # Internal unauthenticated access. Expose carefully.
+      - '8554:8554' # RTSP feeds
+      - '8555:8555/tcp' # WebRTC over tcp
+      - '8555:8555/udp' # WebRTC over udp
+    environment:
+      - TZ=Europe/Lisbon
